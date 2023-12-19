@@ -82,7 +82,13 @@
 			"style": {
 				"navigationBarTitleText": "敬请期待"
 			}
-		}
+		},
+    {
+      "path": "pages/admin/admin",
+      "style": {
+        "navigationBarTitleText": "管理员页面"
+      }
+    }
 	],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
@@ -125,6 +131,35 @@
 	},
 	// 分包加载规则
 	"subPackages": [
+    {
+      "root": "pagesAdmin",
+      "pages": [
+        {
+          "path": "goodsManage/goodsManage",
+          "style": {
+            "navigationBarTitleText": "商品管理页面"
+          }
+        },
+        {
+          "path": "goodsDetails/goodsDetails",
+          "style": {
+            "navigationBarTitleText": "商品详情管理页面"
+          }
+        },
+        {
+          "path": "orderManage/orderManage",
+          "style": {
+            "navigationBarTitleText": "订单管理页面"
+          }
+        },
+        {
+          "path": "orderDetails/orderDetails",
+          "style": {
+            "navigationBarTitleText": "订单详情管理页面"
+          }
+        }
+      ]
+    },
 		{
 			// 子包的根目录
 			"root": "pagesMember",
@@ -216,7 +251,7 @@
 						"navigationBarTitleText": "退款"
 					}
 				}
-				
+
 			]
 		}
 	],

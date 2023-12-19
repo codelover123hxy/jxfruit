@@ -16,15 +16,6 @@ const { safeAreaInsets } = uni.getSystemInfoSync()
 
 // 弹出层组件
 const popup = ref<UniHelper.UniPopupInstance>()
-// 取消原因列表
-const reasonList = ref([
-  '商品无货',
-  '不想要了',
-  '商品信息填错了',
-  '地址信息填写错误',
-  '商品降价',
-  '其它',
-])
 // 订单取消原因
 const reason = ref('')
 // 复制内容
@@ -89,7 +80,7 @@ const getMemberOrderByIdData = async () => {
   //   )
   // )
   // {
-    // getMemberOrderLogisticsByIdData()
+  // getMemberOrderLogisticsByIdData()
   // }
 }
 
@@ -105,37 +96,9 @@ onLoad(() => {
   isShow.value = false
 })
 
+const orderStatueText = ['待付款', '待发货', '待收货', '待评价', '已完成', '已取消']
+
 const emit = defineEmits(['showComment'])
-
-// 倒计时结束事件
-const onTimeup = () => {
-  // 修改订单状态为已取消
-  order.value!.orderState = OrderState.YiQuXiao
-}
-
-// 订单支付
-const onOrderPay = async () => {
-  const res = await wxPay({
-    amount: Math.round(order.value.payMoney * 100),
-    orderId: query.id
-  })
-  wx.requestPayment({
-    timeStamp: res.data.timeStamp, // 时间戳，从1970年1月1日00:00:00至今的秒数，即当前的时间
-    nonceStr: res.data.nonceStr, // 随机字符串，长度为32个字符以下。
-    package: res.data.package, // 统一下单接口返回的 prepay_id 参数值，格式如“prepay_id=*”
-    signType: res.data.signType, // 签名算法类型，默认为 MD5，支持RSA等其他加密算法
-    paySign: res.data.paySign, // 签名，详见签名生成算法
-    success: function (response) {
-      // 支付成功后的回调函数， res.errMsg = 'requestPayment:ok'
-      console.log(response)
-      uni.redirectTo({ url: `/pagesOrder/payment/payment?id=${query.id}` })
-    },
-    fail: function (response) {
-      console.log(response)
-      // 支付失败或取消支付后的回调函数， res.errMsg = 'requestPayment:fail cancel' 取消支付；res.errMsg = 'requestPayment:fail (detail error message)'
-    }
-  })
-}
 
 
 // 模拟发货
@@ -207,19 +170,6 @@ const onOrderCancel = async () => {
 </script>
 
 <template>
-  <!-- 自定义导航栏: 默认透明不可见, scroll-view 滚动到 50 时展示 -->
-  <view class="navbar" :style="{ paddingTop: safeAreaInsets?.top + 'px' }">
-    <view class="wrap">
-      <navigator
-        v-if="pages.length > 1"
-        open-type="navigateBack"
-        class="back icon-left"
-      ></navigator>
-      <navigator v-else url="/pages/index/index" open-type="switchTab" class="back icon-home">
-      </navigator>
-      <view class="title">订单详情</view>
-    </view>
-  </view>
   <CommentBox @close="close" style="position: fixed;z-index: 10" v-if="isShow"></CommentBox>
   <scroll-view
     enable-back-to-top
@@ -230,48 +180,10 @@ const onOrderCancel = async () => {
   >
     <template v-if="order">
       <!-- 订单状态 -->
-      <view class="overview" :style="{ paddingTop: safeAreaInsets?.top + 20 + 'px' }">
-        <!-- 待付款状态:展示倒计时 -->
-        <template v-if="order.orderState === OrderState.DaiFuKuan">
-          <view class="status icon-clock">等待付款</view>
-          <view class="tips">
-            <text class="money">应付金额: ¥ {{ order.payMoney }}</text>
-            <text class="time">支付剩余</text>
-            <uni-countdown
-              :minute="2"
-              color="#fff"
-              splitor-color="#fff"
-              :show-day="false"
-              :show-colon="false"
-              @timeup="onTimeup"
-            />
-          </view>
-          <view class="button" @tap="onOrderPay">去支付</view>
-        </template>
-        <!-- 其他订单状态:展示再次购买按钮 -->
-        <template v-else>
-          <!-- 订单状态文字 -->
+      <view class="overview" :style="{ paddingTop: safeAreaInsets?.top  + 'px' }">
+<!--          <view class="status icon-clock">{{orderStatueText[order.orderState]}}</view>-->
+<!--          &lt;!&ndash; 订单状态文字 &ndash;&gt;-->
           <view class="status"> {{ orderStateList[order.orderState].text }} </view>
-          <view class="button-group">
-            <navigator
-              class="button"
-              :url="`/pagesOrder/create/create?orderId=${query.id}&type=3`"
-              hover-class="none"
-            >
-              再次购买
-            </navigator>
-            <!-- 待发货状态：模拟发货,开发期间使用,用于修改订单状态为已发货 -->
-
-            <!-- 待收货状态: 展示确认收货按钮 -->
-            <view
-              v-if="order.orderState === OrderState.DaiShouHuo"
-              @tap="onOrderConfirm"
-              class="button"
-            >
-              确认收货
-            </view>
-          </view>
-        </template>
       </view>
       <!-- 配送状态 -->
       <view class="shipment">
@@ -309,23 +221,8 @@ const onOrderCancel = async () => {
                   <text>{{ item.price }}</text>
                 </view>
               </view>
-
-            </view>
-            <view>
-                <view  v-if="order.orderState === OrderState.DaiPingJia
-                && item.is_commented === 0"
-                  @tap.stop="onComment(item.goodsId)" class="button"> 去评价
-                </view>
-                <view v-if="order.orderState !== OrderState.DaiFuKuan"
-                  @tap.stop="onRefund(item.id)" class="button refund"> 申请退款
-                </view>
-                <view class="quantity">x{{ item.num }}</view>
             </view>
           </navigator>
-          <!-- 待评价状态:展示按钮 -->
-          <view class="action" v-if="order.orderState === OrderState.DaiPingJia">
-            <button open-type="contact" class="button primary">联系客服</button>
-          </view>
         </view>
         <!-- 合计 -->
         <view class="total">
@@ -362,38 +259,11 @@ const onOrderCancel = async () => {
       <view class="toolbar-height" :style="{ paddingBottom: safeAreaInsets?.bottom + 'px' }"></view>
       <view class="toolbar" :style="{ paddingBottom: safeAreaInsets?.bottom + 'px' }">
         <!-- 待付款状态:展示支付按钮 -->
-        <template v-if="order.orderState === OrderState.DaiFuKuan">
-          <view class="button primary" @tap="onOrderPay"> 去支付 </view>
-          <view class="button" @tap="popup?.open?.()"> 取消订单 </view>
-        </template>
-        <!-- 其他订单状态:按需展示按钮 -->
-        <template v-else>
-          <navigator
-            class="button secondary"
-            :url="`/pagesOrder/create/create?orderId=${query.id}&type=3`"
-            hover-class="none"
-          >
-            再次购买
-          </navigator>
-          <!-- 待收货状态: 展示确认收货 -->
-          <view
-            class="button primary"
-            v-if="order.orderState === OrderState.DaiShouHuo"
-            @tap="onOrderConfirm"
-          >
-            确认收货
+        <view class="button primary" v-if="order.orderState!==6" > 退款 </view>
+        <view class="button delete"> 取消订单 </view>
+          <view class="button">
+            复制订单
           </view>
-          <!-- 待评价状态: 展示去评价 -->
-          <!-- <view class="button" v-if="order.orderState === OrderState.DaiPingJia"> 去评价 </view> -->
-          <!-- 待评价/已完成/已取消 状态: 展示删除订单 -->
-          <view
-            class="button delete"
-            v-if="order.orderState >= OrderState.DaiPingJia"
-            @tap="onOrderDelete"
-          >
-            删除订单
-          </view>
-        </template>
       </view>
     </template>
     <template v-else>
@@ -471,8 +341,8 @@ page {
 }
 
 .refund {
-    margin-top: 30rpx;
-  }
+  margin-top: 30rpx;
+}
 
 .overview {
   display: flex;
@@ -653,17 +523,17 @@ page {
     }
 
     .button {
-        width: 200rpx;
-        height: 60rpx;
-        text-align: center;
-        justify-content: center;
-        line-height: 60rpx;
-        margin-left: 20rpx;
-        border-radius: 60rpx;
-        border: 1rpx solid #ccc;
-        font-size: 26rpx;
-        color: #444;
-      }
+      width: 200rpx;
+      height: 60rpx;
+      text-align: center;
+      justify-content: center;
+      line-height: 60rpx;
+      margin-left: 20rpx;
+      border-radius: 60rpx;
+      border: 1rpx solid #ccc;
+      font-size: 26rpx;
+      color: #444;
+    }
 
     .action {
       // display: flex;
