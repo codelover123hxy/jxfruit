@@ -38,7 +38,7 @@ onMounted(async () => {
       name: '优惠券',
       title: `${member.value?.couponNum}张`,
       type: 0
-    },    
+    },
     {
       id: 2,
       name: '核销券',
@@ -124,12 +124,12 @@ const memberTypes = [
     <view class="orders member">
       <view class="title" style="padding-left: 20rpx;">
          会员中心
-        <navigator class="navigator" 
+        <navigator class="navigator"
         v-if="roleStore.role === 1"
         url="/pagesMember/member-center/member-center" hover-class="none">
           全部<text class="icon-right"></text>
         </navigator>
-        <navigator class="navigator" 
+        <navigator class="navigator"
         v-if="roleStore.role === 2"
         url="/pagesAdmin/goodsManage/goodsManage" hover-class="none">
           商品管理<text class="icon-right"></text>
@@ -137,7 +137,7 @@ const memberTypes = [
       </view>
       <view class="section">
         <!-- 订单 -->
-        <navigator v-for="item in memberTypes" :key="item.type" url="/pages/coming-soon/coming-soon" class="navigator"
+        <navigator v-for="item in memberTypes" :key="item.type"  class="navigator"
           hover-class="none" style=" padding-bottom: 15rpx;">
           <image :src="item.imgUrl" mode="aspectFit" style="margin-bottom: 10rpx;"></image>
           <view style="">{{ item.text }}</view>
@@ -185,13 +185,13 @@ const memberTypes = [
           '/pagesMember/priviledge/priviledge' : '/pages/login/login'" hover-class="none">
           全部<text class="icon-right"></text>
         </navigator>
-        <navigator class="navigator" 
+        <navigator class="navigator"
           v-if="roleStore.role === 2"
           :url="memberStore.profile ?
           '/pagesAdmin/couponManage/couponManage' : '/pages/login/login'" hover-class="none">
           优惠券管理<text class="icon-right"></text>
         </navigator>
-        <navigator class="navigator" 
+        <navigator class="navigator"
           v-if="roleStore.role === 2"
           :url="memberStore.profile ?
           '/pagesAdmin/qrCodeVerify/qrCodeVerify' : '/pages/login/login'" hover-class="none">

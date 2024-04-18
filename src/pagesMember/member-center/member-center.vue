@@ -2,31 +2,43 @@
 import type { MemberItem } from '@/types/member'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useMemberStore } from '@/stores'
-import { getMemberInfo } from '@/services/member'
-
-const newuseMemberStore = useMemberStore()
+import { getLotteryCoupon, getMemberInfo } from '@/services/member'
 const memberInfo = getMemberInfo()
 const level = ref()
-const memberInfomation = ref()
+const memberInformation = ref()
 const diff = ref()
+const birthdayGift = ref()
 const couponData = {
   isFlipped: false,
 }
+const levelMap = new Map([
+  ['白银会员', '暂时还没有哦'],
+  ['黄金会员', '满20减5优惠券1张'],
+  ['铂金会员', '满20减5优惠券2张\n满50减10优惠券1张'],
+  ['钻石会员', '满20减5优惠券2张\n满50减10优惠券1张'],
+  ['星耀会员', '满20减5优惠券2张\n满50减10优惠券1张\n10元无门槛优惠券3张'],
+])
 const showToast = () => {
   uni.showModal({
     title: '会员须知',
-    content: '当前该等级会员: ' + memberInfomation.value.requirement + '\n' +memberInfomation.value.treatment
+    content:
+      '当前该等级会员: ' +
+      memberInformation.value.requirement +
+      '\r\n' +
+      memberInformation.value.treatment,
   })
 }
-
+const coupon = ref()
 const variable = ref() // 初始化变量
 memberInfo
   .then((result) => {
-    memberInfomation.value = result.data.membership
-    console.log(memberInfomation.value)
-    diff.value = memberInfomation.value.diffToNextLevel
-    level.value = memberInfomation.value.name
-    variable.value = memberInfomation.value.vipLevel
+    memberInformation.value = result.data.membership
+    console.log(memberInformation.value)
+    diff.value = memberInformation.value.diffToNextLevel
+    level.value = memberInformation.value.name
+    variable.value = memberInformation.value.vipLevel
+    birthdayGift.value = memberInformation.value.birthdayGift
+    coupon.value = levelMap.get(level.value)
   })
   .catch((error) => {
     // 处理错误
@@ -47,7 +59,7 @@ const cardColor = computed(() => {
       return '#b95b09'
   }
 })
-
+console.log(coupon)
 const memberTypes = [
   {
     type: 'a1',
@@ -71,16 +83,32 @@ const memberTypes = [
   },
 ]
 
-
+const handleLottery = async () => {
+  const res = await getLotteryCoupon()
+  console.log(res)
+  if (res.msg === 'success') {
+    await uni.showModal({
+      title: '抽奖结果',
+      content: `恭喜你抽中满${res.data.effectivePrice}减${res.data.price}的优惠券！`,
+    })
+  } else {
+    await uni.showModal({
+      title: '抽奖结果',
+      content: `谢谢惠顾`,
+    })
+  }
+}
 </script>
 <template>
   <view class="box">
     <div class="membercontainer">
-      <swiper-item @click='showToast'>
-        <view class="card" :style="{ backgroundColor: cardColor }">
+      <swiper-item>
+        <view class="card" :style="{ backgroundColor: cardColor }" @click="showToast">
           <text class="member">{{ level }}</text>
           <view style="width: 300rpx; margin-left: 90rpx; margin-top: 40rpx">
-            <text style="font-size: 20rpx; margin-top: 10rpx">0目前距离升级还需要消费{{ diff }} </text>
+            <text style="font-size: 20rpx; margin-top: 10rpx"
+              >0目前距离升级还需要消费{{ diff }}
+            </text>
             <progress :percent="0" :active="true" :border-radius="3" :stroke-width="3"></progress>
             <img src="../../static/images/jx_logo.png" class="image" />
           </view>
@@ -101,13 +129,24 @@ const memberTypes = [
     <view class="container">
       <view class="children1">
         <text class="title1">会员免运费</text>
+        <div style='display: flex;justify-content: center;align-items: center;height: 70%'>
+          <span style='font-size: 1.5rem'>敬请期待</span>
+        </div>
       </view>
       <view class="children1">
         <text class="title1">专享免减券</text>
-
+        <div style='font-size: 0.9rem;display: flex;height: 70%;flex-flow: column;justify-content: center;margin-left: 4%;margin-top: 6px'>
+          <div>生日礼:&ensp;{{ birthdayGift }}</div>
+          <view><text>会员礼:&ensp;<text style='display: inline-flex;justify-content: start'>{{ coupon }}</text></text></view>
+        </div>
       </view>
       <view class="children1">
         <text class="title1">抽优惠券</text>
+        <div style="padding: 20px">
+          <button style="background: #61d272; width: 80%; border-radius: 4px" @tap="handleLottery">
+            点击抽取优惠券
+          </button>
+        </div>
       </view>
     </view>
   </view>
@@ -208,7 +247,7 @@ const memberTypes = [
 
   .children1 {
     width: 100%;
-    height: 280rpx;
+    height: 250rpx;
     background-color: burlywood;
     border-radius: 60rpx;
     padding: 20rpx;

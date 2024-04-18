@@ -82,12 +82,6 @@
 			"style": {
 				"navigationBarTitleText": "敬请期待"
 			}
-		},
-		{
-			"path": "pages/admin/admin",
-			"style": {
-				"navigationBarTitleText": "管理员页面"
-			}
 		}
 	],
 	"globalStyle": {

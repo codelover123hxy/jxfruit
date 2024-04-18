@@ -7,3 +7,10 @@ export const getMemberInfo = () => {
         method: 'GET'
     })
 }
+
+export const getLotteryCoupon = () => {
+  return http({
+    url: '/coupon/lottery',
+    method: 'GET',
+  })
+}

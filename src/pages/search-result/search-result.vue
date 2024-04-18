@@ -10,6 +10,7 @@ import ScalePanel from '../../components/ScalePanel.vue'
 const scrolltolower = () => {
   console.log("下拉")
   // activeIndex.value = activeIndex.value + 1
+
 }
 enum SkuMode {
   Both = 1,
@@ -19,7 +20,7 @@ enum SkuMode {
 
 onLoad(() => {
     goodsList.value = uni.getStorageSync("goodsInfo")
-   
+
 })
 
 
@@ -90,7 +91,7 @@ const nav = (item) => {
     </view> -->
     <!-- 分类 -->
     <view class="categories">
-      <scroll-view enable-back-to-top class="secondary" 
+      <scroll-view enable-back-to-top class="secondary"
       scroll-y
       @scrolltolower="scrolltolower"
       >
